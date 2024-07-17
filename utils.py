@@ -2,6 +2,7 @@ from preprocess import cleanup
 from sklearn.model_selection import train_test_split
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import metrics
 
 
 def get_data(file, random_state=42):
@@ -46,8 +47,7 @@ def get_data(file, random_state=42):
 
     # REMOVE BART PREDICTIONS FROM VALIDATION SET
     new_xvalid = []
-    ncorrect = 0
-    nsamples = 0
+    predicted = []
     for line in xvalid:
         tokens = line.strip().split(',')
         tweet = ','.join(tokens[:-1])
@@ -56,11 +56,10 @@ def get_data(file, random_state=42):
 
         # SAVE BART PREDICTIONS FOR ACCURACY
         prediction = float(tokens[-1]) >= 0.5
-        ncorrect += int(int(prediction) == int(yvalid[nsamples]))
-        nsamples += 1
+        predicted.append(prediction)
 
     # GET ACCURACY FOR VALIDATION SET
-    ans = float(ncorrect)/float(nsamples)
+    ans = confusion_matrix(yvalid, predicted)
 
     # FORMAT AS NP ARRAY
     ytrain = np.asarray(ytrain)
@@ -104,8 +103,19 @@ def plot_stuff(BART, myNN, Bayes, KNN):
     plt.ylabel('Validation accuracy', fontweight='bold', fontsize=15)
     plt.xticks([r + barWidth for r in range(len(BART))], ['', '', '', '', ''])
     ax = plt.gca()
-    ax.set_ylim([0.6, 0.8])
+    ax.set_ylim([0.5, 0.8])
 
     # PLOT
     plt.legend()
     plt.show()
+
+
+def confusion_matrix(actual, predicted):
+    confusion_matrix = metrics.confusion_matrix(actual, predicted)
+    cm_display = metrics.ConfusionMatrixDisplay(
+        confusion_matrix=confusion_matrix, display_labels=[0, 1])
+
+    cm_display.plot()
+    plt.show()
+
+    return (confusion_matrix[0, 0] + confusion_matrix[1, 1]) / len(actual)

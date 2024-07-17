@@ -2,6 +2,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Embedding, LSTM, Bidirectional
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.utils import pad_sequences
+from utils import confusion_matrix
 
 
 class LSTM_NN:
@@ -51,9 +52,10 @@ class LSTM_NN:
         xvalid = pad_sequences(valid_bow, padding='post', maxlen=30)
 
         # FIT MODEL WEIGHTS TO TRAINING DATA
-        self.model.fit(xtrain, ytrain, epochs=10, batch_size=32,
+        self.model.fit(xtrain, ytrain, epochs=1, batch_size=32,
                        validation_data=(xvalid, yvalid), verbose=1)
 
         # EVALUATE MODEL ACCURACY
-        results = self.model.evaluate(xvalid, yvalid, verbose=0)
-        return results[1]
+        predicted = (self.model.predict(xvalid) > 0.5).astype("int32")
+
+        return confusion_matrix(yvalid, predicted)

@@ -1,4 +1,5 @@
 from textblob.classifiers import NaiveBayesClassifier as NBC
+from utils import confusion_matrix
 
 
 class NaiveBayes:
@@ -26,9 +27,12 @@ class NaiveBayes:
 
         # MERGE DATA AND CLASSIFIER
         train_list = [(xtrain[i], ytrain[i]) for i in range(0, len(xtrain))]
-        valid_list = [(xvalid[i], yvalid[i]) for i in range(0, len(xvalid))]
 
         # TRAIN AND FIT MODEL
         self.model = NBC(train_list)
 
-        return self.model.accuracy(valid_list)
+        predicted = []
+        for sentence in xvalid:
+            predicted.append(self.model.classify(sentence))
+
+        return confusion_matrix(yvalid, predicted)

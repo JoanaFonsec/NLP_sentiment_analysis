@@ -1,6 +1,6 @@
-from sklearn.metrics import f1_score
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neighbors import KNeighborsClassifier
+from utils import confusion_matrix
 
 
 class KNearestNeighbors:
@@ -8,9 +8,8 @@ class KNearestNeighbors:
         """
         Create K-Nearest Neighbors model and vectorizer
         """
-        self.model = KNeighborsClassifier(n_neighbors=500)
-        self.vectorizer = TfidfVectorizer(max_df=0.90,
-                                          min_df=2, max_features=500)
+        self.model = KNeighborsClassifier(n_neighbors=50, weights='distance')
+        self.vectorizer = TfidfVectorizer(max_features=500)
 
     def performance(self, xtrain, xvalid, ytrain, yvalid):
         """
@@ -34,7 +33,6 @@ class KNearestNeighbors:
 
         # TRAIN MODEL
         self.model.fit(xtrain, ytrain)
-        prediction = self.model.predict(xvalid)
-        score = f1_score(yvalid, prediction)
+        predicted = self.model.predict(xvalid)
 
-        return score
+        return confusion_matrix(yvalid, predicted)
